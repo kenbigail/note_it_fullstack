@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:note_it/core/constants/icons.dart';
 import 'package:note_it/core/constants/images.dart';
+import 'package:note_it/data/dataresource/auth_local_datasource.dart';
+import 'package:note_it/data/dataresource/auth_remote_datasource.dart';
+import 'package:note_it/presentation/auth/bloc/login_bloc.dart';
+import 'package:note_it/presentation/auth/pages/login_page.dart';
 import 'package:note_it/presentation/home/pages/page.dart';
+import 'package:note_it/presentation/profile/blocs/logout_bloc.dart';
 import 'package:note_it/presentation/profile/pages/page.dart';
 
 import 'core/constants/colors.dart';
@@ -18,14 +24,33 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'NoteIt',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => LoginBloc(AuthRemoteDatasource()),
+        ),
+        BlocProvider(
+          create: (context) => LogoutBloc(AuthRemoteDatasource()),
+        ),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'NoteIt',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          useMaterial3: true,
+        ),
+        home: FutureBuilder<bool>(
+            future: AuthLocalDatasource().isAuthData(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData && snapshot.data == true) {
+                return const MainPage();
+              } else {
+                return const SplashScreen();
+              }
+            }
+        ),
       ),
-      home: const SplashScreen(),
     );
   }
 }
@@ -54,7 +79,7 @@ class _SplashScreenState extends State<SplashScreen> {
             Navigator.of(context).pushReplacement(
               PageRouteBuilder(
                 pageBuilder: (context, animation, secondaryAnimation) =>
-                    const MoodboardPage(),
+                const MoodboardPage(),
                 transitionsBuilder:
                     (context, animation, secondaryAnimation, child) {
                   const begin = Offset(0.0, 1.0); // Start from bottom
@@ -118,8 +143,10 @@ class MoodboardPage extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.only(top: 150.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center, // Vertically centers content
-            crossAxisAlignment: CrossAxisAlignment.center, // Horizontally centers content
+            mainAxisAlignment: MainAxisAlignment.center,
+            // Vertically centers content
+            crossAxisAlignment: CrossAxisAlignment.center,
+            // Horizontally centers content
             children: [
               // SVG Splash Image
               SvgPicture.asset(
@@ -159,7 +186,7 @@ class MoodboardPage extends StatelessWidget {
                   onPressed: () {
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (context) => const MainPage()),
+                      MaterialPageRoute(builder: (context) => const LoginPage()),
                     );
                   },
                   style: OutlinedButton.styleFrom(
@@ -167,7 +194,8 @@ class MoodboardPage extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 80),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 20, horizontal: 80),
                   ),
                   child: const Text(
                     'Continue',
