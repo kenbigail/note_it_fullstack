@@ -9,6 +9,7 @@ import 'package:note_it/data/dataresource/auth_remote_datasource.dart';
 import 'package:note_it/presentation/auth/bloc/login_bloc.dart';
 import 'package:note_it/presentation/auth/pages/login_page.dart';
 import 'package:note_it/presentation/home/pages/page.dart';
+import 'package:note_it/presentation/notes/pages/page.dart';
 import 'package:note_it/presentation/profile/blocs/logout_bloc.dart';
 import 'package:note_it/presentation/profile/pages/page.dart';
 
@@ -263,7 +264,10 @@ class _MainPageState extends State<MainPage> {
       body: pages[selectedIndex],
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Add action for the floating button
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AddNotesPage()),
+          );
         },
         elevation: 0,
         backgroundColor: const Color(0xff252B3D),
